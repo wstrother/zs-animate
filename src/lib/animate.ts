@@ -1,15 +1,14 @@
 import { Application } from "pixi.js";
 
 export default {
-    createApp: async () => {
+    createApp: async (canvasElement: HTMLElement) => {
         const app = new Application();
         await app.init({ 
-            width: 640, 
-            height: 360,
+            resizeTo: canvasElement,
             backgroundColor: '#FF0000'
         });
 
-        document.body.appendChild(app.canvas);
+        canvasElement.appendChild(app.canvas);
 
     }
 }

@@ -1,12 +1,28 @@
 <script lang='ts'>
     export let data;
 
-    const log = () => {
-        data.animate.createApp();
+    const log = async () => {
+        const canvasElement = document.getElementById('appCanvas');
+        if (canvasElement) {
+            await data.animate.createApp(canvasElement);
+        }
     }
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<div id="appCanvas"></div>
 
-<button on:click={log}>Click me</button>
+<div id="controls">
+    <button on:click={log} class="btn btn-md">Click me</button>
+</div>
+
+<style>
+    #appCanvas {
+        margin: 1rem;
+        width: 800px;
+        height: 600px;
+    }
+
+    #controls {
+        margin: 1rem;
+    }
+</style>
