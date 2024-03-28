@@ -6,7 +6,7 @@ export const load = (async ({ fetch, params }) => {
     let manifestError = false;
     const start = await fetch(`json/${manifestFile}.json`)
         .then(resp => {
-            if (resp.status !== 200) {manifestError = true; }
+            if (resp.status !== 200) { manifestError = true; }
             return resp.json(); 
         })
         .catch(err => {
