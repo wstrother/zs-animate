@@ -3,23 +3,21 @@ import { Application, Assets, Sprite, Texture } from "pixi.js";
 type TextureHash = Record<string, Texture>;
 
 // load image textures
-async function loadAssets(assets: Record<string, string>): Promise<TextureHash> {
+async function loadTextures(textures: Record<string, string>): Promise<TextureHash> {
     
-    for (const key in assets) {
-        if (assets[key]) {
-            const src = assets[key];
+    for (const key in textures) {
+        if (textures[key]) {
+            const src = textures[key];
             Assets.add({alias: key, src: `/images/${src}`});
         }
     }
 
-    const textures = await Assets.load(Object.keys(assets));
-
-    return textures;
+    return await Assets.load(Object.keys(textures));
 }
 
 
 export default {
-    createApp: async (canvasElement: HTMLElement, start: {images: Record<string, string>}) => {
+    createApp: async (canvasElement: HTMLElement, start: {textures: Record<string, string>}) => {
         const app = new Application();
 
         await app.init({ 
@@ -28,7 +26,8 @@ export default {
         });
 
         canvasElement.appendChild(app.canvas);
-        const textures: TextureHash = await loadAssets(start.images);
+        const textures: TextureHash = await loadTextures(start.textures);
+        console.log(textures);
 
         for (const key in textures) {
             let sprite = Sprite.from(key);
