@@ -1,4 +1,5 @@
-import { Application, Assets, Sprite, Texture } from "pixi.js";
+import { Application, Assets, Sprite, Texture, Spritesheet, type SpritesheetData } from "pixi.js";
+import type { Manifest } from "./types";
 
 type TextureHash = Record<string, Texture>;
 
@@ -15,24 +16,35 @@ async function loadTextures(textures: Record<string, string>): Promise<TextureHa
     return await Assets.load(Object.keys(textures));
 }
 
+// parse sprite sheet data
+async function loadSheets(textures: TextureHash, sheets: Array<SpritesheetData>) {
+
+    for (const key in sheets) {
+        if (sheets[key]) {
+            const meta = sheets[key].meta;
+            if (meta.image) {
+                const texture = textures[meta.image];
+                const sheet = new Spritesheet(texture, sheets[key]);
+                await sheet.parse()
+            }
+        }
+    }
+}
+
 
 export default {
-    createApp: async (canvasElement: HTMLElement, start: {textures: Record<string, string>}) => {
+    createApp: async (canvasElement: HTMLElement, start: Manifest) => {
         const app = new Application();
 
         await app.init({ 
             resizeTo: canvasElement,
-            backgroundColor: '#FF0000'
+            backgroundColor: '#333333'
         });
 
         canvasElement.appendChild(app.canvas);
         const textures: TextureHash = await loadTextures(start.textures);
         console.log(textures);
 
-        for (const key in textures) {
-            let sprite = Sprite.from(key);
-            app.stage.addChild(sprite);
-        };
-
+        await loadSheets(textures, start.sheets)
     }
 }
