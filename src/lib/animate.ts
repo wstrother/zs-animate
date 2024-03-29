@@ -29,7 +29,7 @@ async function loadSheets(textures: TextureHash, sheets: Array<SpritesheetData>)
 
 
 export default {
-    createApp: async (canvasElement: HTMLElement, start: Manifest) => {
+    createApp: async (canvasElement: HTMLElement, manifest: Manifest) => {
         const app = new Application();
 
         await app.init({ 
@@ -38,9 +38,13 @@ export default {
         });
 
         canvasElement.appendChild(app.canvas);
-        const textures: TextureHash = await loadTextures(start.textures);
+        const textures: TextureHash = await loadTextures(manifest.textures);
         console.log(textures);
 
-        await loadSheets(textures, start.sheets)
+        await loadSheets(textures, manifest.sheets);
+        
+        Assets.add({'alias': 'test', src: 'json/test.json'});
+        const res = await Assets.load('test');
+        console.log(res);
     }
 }

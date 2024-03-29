@@ -5,7 +5,7 @@
         if (!data.manifestError) {
             const canvasElement = document.getElementById('appCanvas');
             if (canvasElement) {
-                await data.animate.createApp(canvasElement, data.start);
+                await data.animate.createApp(canvasElement, data.manifest);
             }
         }
     }
