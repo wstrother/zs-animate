@@ -1,11 +1,18 @@
 <script lang='ts'>
+    import { loadedJSON, loadedSpritesheets, loadedTextures } from '$lib/stores.js';
+
     export let data;
     
     const log = async () => {
         if (!data.manifestError) {
             const canvasElement = document.getElementById('appCanvas');
             if (canvasElement) {
-                await data.animate.createApp(canvasElement, data.manifest);
+                await data.animate.createApp(canvasElement, data.manifest)
+                    .then(({ textures, spritesheets, jsonFiles }) => {
+                        loadedTextures.set(textures);
+                        loadedJSON.set(jsonFiles);
+                        loadedSpritesheets.set(spritesheets);
+                    });
             }
         }
     }
