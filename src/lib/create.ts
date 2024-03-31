@@ -72,11 +72,11 @@ export default {
     }> => {
         const app = new Application();
         const stage = app.stage;
+        const appOptions = manifest.init
 
         await app.init({ 
             resizeTo: canvasElement,
-            backgroundColor: '#FFFFFF',
-            useBackBuffer: true
+            ...appOptions
         });
 
         canvasElement.appendChild(app.canvas);

@@ -1,4 +1,4 @@
-import type { Container, Spritesheet, SpritesheetData, Texture } from "pixi.js"
+import type { ApplicationOptions, Container, Spritesheet, SpritesheetData, Texture } from "pixi.js"
 
 type PointData = [number, number] | {x: number, y: number}
 
@@ -14,6 +14,7 @@ export type Manifest = {
     sheets: Record<string, SpritesheetData>,
     json: Record<string, string>,
     sprites: Record<string, {}>,
+    init?: ApplicationOptions
 }
 
 export type AppContext = {

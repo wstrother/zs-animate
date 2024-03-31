@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import animate from '$lib/animate';
+import create from '$lib/create';
 
 
 function findJson(data: any, filenames: Set<string>): void {
@@ -42,7 +42,7 @@ export const load = (async ({ fetch, params }) => {
         });
 
     return {
-        animate,
+        animate: create,
         manifest,
         innerJson,
         manifestFile,
