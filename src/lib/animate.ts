@@ -58,13 +58,13 @@ export default {
 
         canvasElement.appendChild(app.canvas);
         const textures = await loadTextures(manifest.textures);
-        console.log(textures);
+        // console.log(textures);
 
         const spritesheets = await loadSheets(textures, manifest.sheets);
-        console.log('spritesheets', spritesheets);
+        // console.log(spritesheets);
 
         const jsonFiles = await loadJSON(manifest.json);
-        console.log(jsonFiles);
+        // console.log(jsonFiles);
 
         return {
             textures,
