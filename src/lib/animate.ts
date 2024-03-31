@@ -1,5 +1,6 @@
 import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite } from "pixi.js";
 import type { Manifest, SpriteData } from "./types";
+import { createSprite } from "./sprites";
 
 
 // load image textures
@@ -42,22 +43,19 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 }
 
 // instantiate starting sprites from manifest
-function createSprites(sprites: Record<string, SpriteData>, stage: Container) {
+function addSprites(sprites: Record<string, SpriteData>, stage: Container): Record<string, Sprite> {
+    const createdSprites: Record<string, Sprite> = {};
     for (const key in sprites) {
-        const data = sprites[key];
-        if (data.texture) {
-            const sprite = Sprite.from(data.texture);
-            if (data.scale) {
-                sprite.scale.x = data.scale[0];
-                sprite.scale.y = data.scale[1];
-            }
-            if (data.position) {
-                sprite.x = data.position[0];
-                sprite.y = data.position[1];
-            }
-            stage.addChild(sprite)
+        try {
+            const sprite = createSprite(sprites[key]);
+            stage.addChild(sprite);
+            createdSprites[key] = sprite;
+        } catch (error) {
+            console.log(`Error creating sprite '${key}':\n`, error);
         }
     }
+
+    return createdSprites;
 }
 
 
@@ -89,7 +87,8 @@ export default {
         const jsonFiles = await loadJSON(manifest.json);
         // console.log(jsonFiles);
 
-        createSprites(manifest.sprites, stage)
+        const sprites = addSprites(manifest.sprites, stage);
+        // console.log(sprites);
 
         return {
             textures,
