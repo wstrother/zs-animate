@@ -1,5 +1,5 @@
-import { Application, Assets, Texture, Spritesheet, type SpritesheetData } from "pixi.js";
-import type { Manifest } from "./types";
+import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite } from "pixi.js";
+import type { Manifest, SpriteData } from "./types";
 
 
 // load image textures
@@ -41,15 +41,38 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
     return spriteSheets;
 }
 
+// instantiate starting sprites from manifest
+function createSprites(sprites: Record<string, SpriteData>, stage: Container) {
+    for (const key in sprites) {
+        const data = sprites[key];
+        if (data.texture) {
+            const sprite = Sprite.from(data.texture);
+            if (data.scale) {
+                sprite.scale.x = data.scale[0];
+                sprite.scale.y = data.scale[1];
+            }
+            if (data.position) {
+                sprite.x = data.position[0];
+                sprite.y = data.position[1];
+            }
+            stage.addChild(sprite)
+        }
+    }
+}
+
+
 //  instantiates the PIXI application, loads resources specified by the manifest, 
 //  and returns reference objects with key, value pairs for loaded resources and sprite sheets
+//  also returns PIXI application's stage container
 export default {
     createApp: async (canvasElement: HTMLElement, manifest: Manifest): Promise<{
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
-        jsonFiles: Record<string, {}>
+        jsonFiles: Record<string, {}>,
+        stage: Container
     }> => {
         const app = new Application();
+        const stage = app.stage;
 
         await app.init({ 
             resizeTo: canvasElement,
@@ -66,10 +89,13 @@ export default {
         const jsonFiles = await loadJSON(manifest.json);
         // console.log(jsonFiles);
 
+        createSprites(manifest.sprites, stage)
+
         return {
             textures,
             spritesheets,
-            jsonFiles
+            jsonFiles,
+            stage,
         }
     }
 }
