@@ -5,13 +5,14 @@ type PointData = [number, number] | {x: number, y: number}
 export type SpriteData = {
     texture?: string | Texture,
     spritesheet?: string | Spritesheet,
+    frame?: string,
     scale?: PointData,
     position?: PointData
 }
 
 export type Manifest = {
     textures: Record<string, string>,
-    sheets: Record<string, SpritesheetData>,
+    spritesheets: Record<string, SpritesheetData>,
     json: Record<string, string>,
     sprites: Record<string, {}>,
     init?: ApplicationOptions

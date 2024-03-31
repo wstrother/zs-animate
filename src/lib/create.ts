@@ -83,7 +83,7 @@ export default {
         const textures = await loadTextures(manifest.textures);
         // console.log(textures);
 
-        const spritesheets = await loadSheets(textures, manifest.sheets);
+        const spritesheets = await loadSheets(textures, manifest.spritesheets);
         // console.log(spritesheets);
 
         const jsonFiles = await loadJSON(manifest.json);
