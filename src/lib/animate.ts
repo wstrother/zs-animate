@@ -1,5 +1,5 @@
-import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite } from "pixi.js";
-import type { Manifest, SpriteData } from "./types";
+import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite, type SpriteOptions } from "pixi.js";
+import type { AppContext, Manifest, SpriteData } from "./types";
 import { createSprite } from "./sprites";
 
 
@@ -43,11 +43,11 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 }
 
 // instantiate starting sprites from manifest
-function addSprites(sprites: Record<string, SpriteData>, stage: Container): Record<string, Sprite> {
+function addSprites(sprites: Record<string, SpriteData>, {textures, spritesheets, stage}: AppContext): Record<string, Sprite> {
     const createdSprites: Record<string, Sprite> = {};
     for (const key in sprites) {
         try {
-            const sprite = createSprite(sprites[key]);
+            const sprite = createSprite(sprites[key], {textures, spritesheets, stage});
             stage.addChild(sprite);
             createdSprites[key] = sprite;
         } catch (error) {
@@ -75,7 +75,8 @@ export default {
 
         await app.init({ 
             resizeTo: canvasElement,
-            backgroundColor: '#333333'
+            backgroundColor: '#FFFFFF',
+            useBackBuffer: true
         });
 
         canvasElement.appendChild(app.canvas);
@@ -88,8 +89,8 @@ export default {
         const jsonFiles = await loadJSON(manifest.json);
         // console.log(jsonFiles);
 
-        const sprites = addSprites(manifest.sprites, stage);
-        // console.log(sprites);
+        const sprites = addSprites(manifest.sprites, {textures, spritesheets, stage});
+        console.log(sprites);
 
         return {
             textures,
