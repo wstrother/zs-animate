@@ -2,17 +2,21 @@
     import { loadedJSON, loadedSpritesheets, loadedTextures, appStage } from '$lib/stores.js';
 
     export let data;
+    let destroyApp: undefined | Function
     
-    const log = async () => {
+    const create = async () => {
+        if (destroyApp) destroyApp();
+
         if (!data.manifestError) {
             const canvasElement = document.getElementById('appCanvas');
             if (canvasElement) {
                 await data.animate.createApp(canvasElement, data.manifest)
-                    .then(({ textures, spritesheets, jsonFiles, stage }) => {
+                    .then(({ textures, spritesheets, jsonFiles, stage, destroy }) => {
                         loadedTextures.set(textures);
                         loadedJSON.set(jsonFiles);
                         loadedSpritesheets.set(spritesheets);
                         appStage.set(stage);
+                        destroyApp = destroy;
                     });
             }
         }
@@ -30,7 +34,7 @@
 </div>
 
 <div id="controls">
-    <button on:click={log} class="btn btn-md">Click me</button>
+    <button on:click={create} class="btn btn-md">Create app</button>
 </div>
 
 <style>

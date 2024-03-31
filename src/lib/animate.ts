@@ -67,7 +67,8 @@ export default {
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
         jsonFiles: Record<string, {}>,
-        stage: Container
+        stage: Container,
+        destroy: Function 
     }> => {
         const app = new Application();
         const stage = app.stage;
@@ -95,6 +96,9 @@ export default {
             spritesheets,
             jsonFiles,
             stage,
+            destroy: () => {
+                app.destroy({removeView: true});
+            }
         }
     }
 }
