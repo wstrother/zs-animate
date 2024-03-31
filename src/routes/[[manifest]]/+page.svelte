@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { loadedJSON, loadedSpritesheets, loadedTextures } from '$lib/stores.js';
+    import { loadedJSON, loadedSpritesheets, loadedTextures, appStage } from '$lib/stores.js';
 
     export let data;
     
@@ -8,10 +8,11 @@
             const canvasElement = document.getElementById('appCanvas');
             if (canvasElement) {
                 await data.animate.createApp(canvasElement, data.manifest)
-                    .then(({ textures, spritesheets, jsonFiles }) => {
+                    .then(({ textures, spritesheets, jsonFiles, stage }) => {
                         loadedTextures.set(textures);
                         loadedJSON.set(jsonFiles);
                         loadedSpritesheets.set(spritesheets);
+                        appStage.set(stage);
                     });
             }
         }
