@@ -90,7 +90,7 @@ export default {
         // console.log(jsonFiles);
 
         const sprites = addSprites(manifest.sprites, {textures, spritesheets, stage});
-        console.log(sprites);
+        // console.log(sprites);
 
         return {
             textures,
