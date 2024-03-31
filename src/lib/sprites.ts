@@ -1,14 +1,25 @@
-import { Sprite } from "pixi.js";
+import { ObservablePoint, Sprite } from "pixi.js";
 import type { SpriteData } from "./types";
 
-function setSpriteData(sprite: Sprite, data: SpriteData) {
-    if (data.scale) {
-        sprite.scale.x = data.scale[0];
-        sprite.scale.y = data.scale[1];
-    }
-    if (data.position) {
-        sprite.x = data.position[0];
-        sprite.y = data.position[1];
+function setSpriteData(sprite: Sprite, data: SpriteData) { 
+    // need to exclude any expected keys from sprite data
+    // that do not refer to editable members of the Pixi sprite class
+    const excludeKeys: Array<string> = ['texture', 'spritesheet'];
+
+    for (const key in data) {
+        if (sprite[key as keyof Sprite] instanceof ObservablePoint) {
+            // infers keys that refer to points with x, y values 
+            const [x, y] = data[key as keyof SpriteData] as [number, number];
+            const point = sprite[key as keyof Sprite] as ObservablePoint;
+            point.x = x;
+            point.y = y;
+
+        } else if (!excludeKeys.includes(key)) {
+            // catch all asignment, to pass whatever sprite data can be
+            // assigned directly from provided JSON
+            // @ts-ignore       <-- suppress error for possible readonly members
+            sprite[key as keyof Sprite] = data[key as keyof SpriteData]
+        }
     }
 }
 
