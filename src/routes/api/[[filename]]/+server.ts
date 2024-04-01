@@ -2,16 +2,18 @@ import { json } from '@sveltejs/kit';
 
 async function loadJSONRecursively(
         url: string, 
-        fetch: Function, 
-        loadedFiles: Map<string, boolean> = new Map()
+        fetch: Function,
+        loadedFiles: Map<string, boolean> = new Map(),
+        encounteredFiles: Set<string> = new Set()
     ): Promise<any> {
         
     // Check for infinite loops
-    if (loadedFiles.has(url)) {
+    if (encounteredFiles.has(url)) {
         throw new Error('Infinite loop detected!');
     }
-    // Mark the current file as loaded
-    loadedFiles.set(url, true);
+
+    // Mark the current file as encountered
+    encounteredFiles.add(url);
 
     // Fetch JSON data
     const response = await fetch(url);
@@ -26,7 +28,7 @@ async function loadJSONRecursively(
         if (typeof jsonData[key] === 'string' && jsonData[key].endsWith('.json')) {
             const nestedUrl = `/json/${jsonData[key]}`;
             promises.push(
-                loadJSONRecursively(nestedUrl, fetch, loadedFiles)
+                loadJSONRecursively(nestedUrl, fetch, loadedFiles, new Set(encounteredFiles))
                     .then((nestedData) => {
                         jsonData[key] = nestedData;
                     })
@@ -37,6 +39,9 @@ async function loadJSONRecursively(
         }
     }
     await Promise.all(promises);
+
+    // Mark the current file as loaded
+    loadedFiles.set(url, true);
 
     return jsonData;
 }
