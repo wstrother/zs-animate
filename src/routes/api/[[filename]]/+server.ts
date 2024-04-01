@@ -9,7 +9,7 @@ async function loadJSONRecursively(
         
     // Check for infinite loops
     if (encounteredFiles.has(url)) {
-        throw new Error('Infinite loop detected!');
+        throw new Error('Infinite recursion');
     }
 
     // Mark the current file as encountered
@@ -33,7 +33,7 @@ async function loadJSONRecursively(
                         jsonData[key] = nestedData;
                     })
                     .catch((error) => {
-                        throw new Error(`Error loading nested JSON from ${nestedUrl}: ${error.message}`);
+                        throw error;
                     })
             );
         }
