@@ -1,6 +1,11 @@
 import { json } from '@sveltejs/kit';
 
-async function loadJSONRecursively(url: string, fetch: Function, loadedFiles: Map<string, boolean> = new Map()): Promise<any> {
+async function loadJSONRecursively(
+        url: string, 
+        fetch: Function, 
+        loadedFiles: Map<string, boolean> = new Map()
+    ): Promise<any> {
+        
     // Check for infinite loops
     if (loadedFiles.has(url)) {
         throw new Error('Infinite loop detected!');
