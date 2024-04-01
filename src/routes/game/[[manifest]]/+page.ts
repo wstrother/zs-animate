@@ -25,7 +25,7 @@ export const load = (async ({ fetch, params }) => {
 
     const innerJson = new Set<string>();
 
-    const manifest = await fetch(`json/${manifestFile}.json`)
+    const manifest = await fetch(`/json/${manifestFile}.json`)
         .then(resp => {
             if (resp.status !== 200) { manifestError = true; }
             return resp.json(); 
