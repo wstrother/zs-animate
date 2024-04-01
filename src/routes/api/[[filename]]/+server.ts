@@ -6,6 +6,12 @@ async function loadJSONRecursively(
         loadedFiles: Map<string, boolean> = new Map(),
         encounteredFiles: Set<string> = new Set()
     ): Promise<any> {
+    
+    // Check if the file has already been loaded
+    if (loadedFiles.has(url)) {
+        return loadedFiles.get(url);
+    }
+    console.log(`Loading ${url}`);
         
     // Check for infinite loops
     if (encounteredFiles.has(url)) {
@@ -27,6 +33,7 @@ async function loadJSONRecursively(
     for (const key in jsonData) {
         if (typeof jsonData[key] === 'string' && jsonData[key].endsWith('.json')) {
             const nestedUrl = `/json/${jsonData[key]}`;
+            
             promises.push(
                 loadJSONRecursively(nestedUrl, fetch, loadedFiles, new Set(encounteredFiles))
                     .then((nestedData) => {
@@ -41,7 +48,7 @@ async function loadJSONRecursively(
     await Promise.all(promises);
 
     // Mark the current file as loaded
-    loadedFiles.set(url, true);
+    loadedFiles.set(url, jsonData);
 
     return jsonData;
 }
