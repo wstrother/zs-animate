@@ -1,78 +1,85 @@
 import { json } from '@sveltejs/kit';
 
+function findJson(data: any, filenames: Set<string> ): void {
+    if (typeof data === 'string') {
+        if (data.endsWith('.json')) {
+            filenames.add(data);
+        }
+    } else if (Array.isArray(data)) {
+        for (const item of data) {
+            findJson(item, filenames);
+        }
+    } else if (typeof data === 'object' && data !== null) {
+        for (const key in data) {
+            findJson(data[key], filenames);
+        }
+    }
+}
+
 async function loadJSONRecursively(
-        url: string, 
+        filename: string, 
         fetch: Function,
-        loadedFiles: Map<string, boolean> = new Map(),
-        encounteredFiles: Set<string> = new Set()
-    ): Promise<any> {
+        loadedFiles: Map<string, any>,
+        encounteredFiles: Set<string> = new Set(),
+        searchedFiles: Set<string>|undefined = undefined
+    ): Promise<Map<string, any>> {
     
     // Check if the file has already been loaded
-    if (loadedFiles.has(url)) {
-        return loadedFiles.get(url);
+    if (loadedFiles.has(filename)) {
+        return loadedFiles.get(filename);
     }
-    console.log(`Loading ${url}`);
-        
-    // Check for infinite loops
-    if (encounteredFiles.has(url)) {
-        throw new Error('Infinite recursion');
+    console.log(`Loading ${filename}`);
+
+    // Check for infinite loops at the current recursion level
+    if (searchedFiles) {
+        if (searchedFiles.has(filename)) {
+            throw new Error('Infinite recursion');
+        }
+        searchedFiles.add(filename);
     }
 
     // Mark the current file as encountered
-    encounteredFiles.add(url);
+    // encounteredFiles.add(filename);
+    
 
     // Fetch JSON data
-    const response = await fetch(url);
+    // loadedFiles.set(filename, true);
+    const response = await fetch(`/json/${filename}`);
     if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+        throw new Error(`Failed to fetch /json/${filename}: ${response.statusText}`);
     }
     const jsonData = await response.json();
 
-    // Recursively load JSON files referenced in the loaded data
-    const promises: Promise<void>[] = [];
-    for (const key in jsonData) {
-        if (typeof jsonData[key] === 'string' && jsonData[key].endsWith('.json')) {
-            const nestedUrl = `/json/${jsonData[key]}`;
-            
-            promises.push(
-                loadJSONRecursively(nestedUrl, fetch, loadedFiles, new Set(encounteredFiles))
-                    .then((nestedData) => {
-                        jsonData[key] = nestedData;
-                    })
-                    .catch((error) => {
-                        throw error;
-                    })
-            );
-        }
+    // Mark the current file as loaded
+    loadedFiles.set(filename, jsonData);
+
+    // Search the data for inner json files
+    findJson(jsonData, encounteredFiles);
+
+    // Recursively load inner json files
+    const promises: Promise<Map<string, any>>[] = [];
+    for (const innerFilename of encounteredFiles) {
+        if (!searchedFiles) searchedFiles = new Set();
+
+        promises.push(
+            loadJSONRecursively(innerFilename, fetch, loadedFiles, encounteredFiles, searchedFiles)
+                .catch((error) => {
+                    throw error;
+                })
+        );
     }
     await Promise.all(promises);
 
-    // Mark the current file as loaded
-    loadedFiles.set(url, jsonData);
-
-    return jsonData;
+    return loadedFiles;
 }
 
 export async function GET({ fetch, params}) {
-	const manifestFile = params?.filename?.replace('/','') || 'start';
+	const manifestFile = `${(params?.filename?.replace('/','') || 'start')}.json`;
     let manifestError = false;
 
-    const manifest = await loadJSONRecursively(`/json/${manifestFile}.json`, fetch);
-	// const manifest = await fetch(`/json/${manifestFile}.json`)
-    //     .then(resp => {
-    //         if (resp.status !== 200) { manifestError = true; }
-    //         return resp.json(); 
-    //     })
-    //     // .then(json => {
-    //     //     // search for inner JSON files only goes one level from manifest file
-    //     //     // so as to not need loop detection
-    //     //     findJson(json, innerJson);
-    //     //     return json;
-    //     // })
-    //     .catch(err => {
-    //         console.log(err);
-    //         manifestError = true;
-    //     });
+    const loadedFiles = await loadJSONRecursively(manifestFile, fetch, new Map());
+    console.log(loadedFiles);
+    const manifest = loadedFiles.get(manifestFile);
 		
 	return json({
 		manifestFile,
