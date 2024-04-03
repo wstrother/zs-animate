@@ -1,56 +1,41 @@
 import { json } from '@sveltejs/kit';
 
-function findJsonFilenames(
-        callback: (s:string) => void,
-        item: string|Array<any>|Record<string, any>
-    ): void {
 
-    if (typeof item === 'string') {
-        if (item.endsWith('.json')) {
-            callback(item);
-        }
-    } else if (Array.isArray(item)) {
-        for (const [i, element] of item.entries()) {
-            findJsonFilenames(callback, element);
-        }
-    } else if (typeof item === 'object' && item !== null) {
-        for (const key in item) {
-            findJsonFilenames(callback, item[key]);
+function findInnerJson(
+    jsonData: Record<string,any>,
+    callback: (parentKey:any, parentItem:any) => void
+) {
+    const checkItem = (callback: (pk:any, pi:any) => void, parentItem: any, parentKey: any) => {
+        const item = parentItem[parentKey];
+    
+        if (typeof item === 'string') {
+            if (item.endsWith('.json')) {
+                callback(parentKey, parentItem);
+            }
+        } else if (Array.isArray(item)) {
+            for (const [i, element] of item.entries()) {
+                checkItem(callback, item, i);
+            }
+        } else if (typeof item === 'object' && item !== null) {
+            for (const key in item) {
+                checkItem(callback, item, key);
+            }
         }
     }
-}
 
-function replaceJson(
-        callback: (parentItem:any, parentKey:any, item:any) => void,
-        parentItem: any, 
-        parentKey: any,
-    ): void {
-    
-    const item = parentItem[parentKey];
-
-    if (typeof item === 'string') {
-        if (item.endsWith('.json')) {
-            callback(parentItem, parentKey, item);
-        }
-    } else if (Array.isArray(item)) {
-        for (const [i, element] of item.entries()) {
-            replaceJson(callback, element, i);
-        }
-    } else if (typeof item === 'object' && item !== null) {
-        for (const key in item) {
-            replaceJson(callback, item[key], key);
-        }
+    for (const key in jsonData) {
+        checkItem(callback, jsonData, key);
     }
 }
 
 
 async function loadJsonRecursively(
-        filename: string, 
-        fetch: Function,
-        loadedFiles: Map<string, any>,
-        encounteredFiles: Set<string> = new Set(),
-        searchedFiles: Set<string>|undefined = undefined
-    ): Promise<Map<string, any>> {
+    filename: string, 
+    fetch: Function,
+    loadedFiles: Map<string, any>,
+    encounteredFiles: Set<string> = new Set(),
+    searchedFiles: Set<string>|undefined = undefined
+): Promise<Map<string, any>> {
     
     // Check if the file has already been loaded
     if (loadedFiles.has(filename)) {
@@ -77,10 +62,7 @@ async function loadJsonRecursively(
     loadedFiles.set(filename, jsonData);
 
     // Search the data for inner json file aliases
-    findJsonFilenames(
-        s => encounteredFiles.add(s), 
-        jsonData
-    );
+    findInnerJson(jsonData, (k:any, i:any) => encounteredFiles.add(i[k]));
 
     // Recursively load encounterd json file aliases
     const promises: Promise<Map<string, any>>[] = [];
@@ -109,16 +91,10 @@ export async function GET({ fetch, params}) {
     const manifest = loadedFiles.get(manifestFile);
 
     // substitue json file aliases for loaded data
-    for (const [name, data] of loadedFiles) {
-        for (const key in data) {
-            replaceJson((parentItem:any, parentKey:any, item:any) => {
-                console.log(parentItem, parentKey, item);
-                parentItem[parentKey] = loadedFiles.get(item);
-            }, data, key);
-        }
+    for (const [name, jsonData] of loadedFiles) {
+        findInnerJson(jsonData, (k:any, i:any) => i[k] = loadedFiles.get(i[k]));
     }
-    
-		
+
 	return json({
 		manifestFile,
 		manifestError,
