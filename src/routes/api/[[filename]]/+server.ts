@@ -1,22 +1,50 @@
 import { json } from '@sveltejs/kit';
 
-function findJson(data: any, filenames: Set<string> ): void {
-    if (typeof data === 'string') {
-        if (data.endsWith('.json')) {
-            filenames.add(data);
+function findJsonFilenames(
+        callback: (s:string) => void,
+        item: string|Array<any>|Record<string, any>
+    ): void {
+
+    if (typeof item === 'string') {
+        if (item.endsWith('.json')) {
+            callback(item);
         }
-    } else if (Array.isArray(data)) {
-        for (const item of data) {
-            findJson(item, filenames);
+    } else if (Array.isArray(item)) {
+        for (const [i, element] of item.entries()) {
+            findJsonFilenames(callback, element);
         }
-    } else if (typeof data === 'object' && data !== null) {
-        for (const key in data) {
-            findJson(data[key], filenames);
+    } else if (typeof item === 'object' && item !== null) {
+        for (const key in item) {
+            findJsonFilenames(callback, item[key]);
         }
     }
 }
 
-async function loadJSONRecursively(
+function replaceJson(
+        callback: (parentItem:any, parentKey:any, item:any) => void,
+        parentItem: any, 
+        parentKey: any,
+    ): void {
+    
+    const item = parentItem[parentKey];
+
+    if (typeof item === 'string') {
+        if (item.endsWith('.json')) {
+            callback(parentItem, parentKey, item);
+        }
+    } else if (Array.isArray(item)) {
+        for (const [i, element] of item.entries()) {
+            replaceJson(callback, element, i);
+        }
+    } else if (typeof item === 'object' && item !== null) {
+        for (const key in item) {
+            replaceJson(callback, item[key], key);
+        }
+    }
+}
+
+
+async function loadJsonRecursively(
         filename: string, 
         fetch: Function,
         loadedFiles: Map<string, any>,
@@ -38,12 +66,7 @@ async function loadJSONRecursively(
         searchedFiles.add(filename);
     }
 
-    // Mark the current file as encountered
-    // encounteredFiles.add(filename);
-    
-
     // Fetch JSON data
-    // loadedFiles.set(filename, true);
     const response = await fetch(`/json/${filename}`);
     if (!response.ok) {
         throw new Error(`Failed to fetch /json/${filename}: ${response.statusText}`);
@@ -53,16 +76,19 @@ async function loadJSONRecursively(
     // Mark the current file as loaded
     loadedFiles.set(filename, jsonData);
 
-    // Search the data for inner json files
-    findJson(jsonData, encounteredFiles);
+    // Search the data for inner json file aliases
+    findJsonFilenames(
+        s => encounteredFiles.add(s), 
+        jsonData
+    );
 
-    // Recursively load inner json files
+    // Recursively load encounterd json file aliases
     const promises: Promise<Map<string, any>>[] = [];
     for (const innerFilename of encounteredFiles) {
+        
         if (!searchedFiles) searchedFiles = new Set();
-
         promises.push(
-            loadJSONRecursively(innerFilename, fetch, loadedFiles, encounteredFiles, searchedFiles)
+            loadJsonRecursively(innerFilename, fetch, loadedFiles, encounteredFiles, searchedFiles)
                 .catch((error) => {
                     throw error;
                 })
@@ -73,13 +99,25 @@ async function loadJSONRecursively(
     return loadedFiles;
 }
 
+
 export async function GET({ fetch, params}) {
 	const manifestFile = `${(params?.filename?.replace('/','') || 'start')}.json`;
     let manifestError = false;
 
-    const loadedFiles = await loadJSONRecursively(manifestFile, fetch, new Map());
-    console.log(loadedFiles);
+    // load json files recursively
+    const loadedFiles = await loadJsonRecursively(manifestFile, fetch, new Map());
     const manifest = loadedFiles.get(manifestFile);
+
+    // substitue json file aliases for loaded data
+    for (const [name, data] of loadedFiles) {
+        for (const key in data) {
+            replaceJson((parentItem:any, parentKey:any, item:any) => {
+                console.log(parentItem, parentKey, item);
+                parentItem[parentKey] = loadedFiles.get(item);
+            }, data, key);
+        }
+    }
+    
 		
 	return json({
 		manifestFile,
