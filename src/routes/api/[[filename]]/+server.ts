@@ -1,4 +1,4 @@
-import { json } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
 
 function findInnerJson(
@@ -37,7 +37,6 @@ async function loadJsonRecursively(
     if (loadedFiles.has(filename)) {
         return loadedFiles.get(filename);
     }
-    console.log(`Loading ${filename}`);
 
     // Check for infinite loops at the current recursion level
     if (searchedFiles) {
@@ -80,20 +79,20 @@ async function loadJsonRecursively(
 
 export async function GET({ fetch, params}) {
 	const manifestFile = `${(params?.filename?.replace('/','') || 'start')}.json`;
-    let manifestError = false;
 
-    // load json files recursively
-    const loadedFiles = await loadJsonRecursively(manifestFile, fetch, new Map());
-    const manifest = loadedFiles.get(manifestFile);
-
-    // substitue json file aliases for loaded data
-    loadedFiles.forEach(jsonData => {
-        findInnerJson(jsonData, (k:any, i:any) => i[k] = loadedFiles.get(i[k]));
-    });
-
-	return json({
-		manifestFile,
-		manifestError,
-		manifest
-	});
+    try {
+        // load json files recursively
+        const loadedFiles = await loadJsonRecursively(manifestFile, fetch, new Map());
+        const manifest = loadedFiles.get(manifestFile);
+    
+        // substitue json file aliases for loaded data
+        loadedFiles.forEach(jsonData => {
+            findInnerJson(jsonData, (k:any, i:any) => i[k] = loadedFiles.get(i[k]));
+        });
+        
+        return json(manifest);
+    } catch (err) {
+        console.log(err)
+        throw error(500, `Error encountered while fetching ${manifestFile}`);
+    }
 }
