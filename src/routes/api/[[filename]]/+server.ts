@@ -12,13 +12,9 @@ function findInnerJson(
             if (item.endsWith('.json')) {
                 callback(parentKey, parentItem);
             }
-        } else if (Array.isArray(item)) {
-            for (const [i, element] of item.entries()) {
-                checkItem(callback, item, i);
-            }
-        } else if (typeof item === 'object' && item !== null) {
-            for (const key in item) {
-                checkItem(callback, item, key);
+        } else {
+            for (const key of Object.keys(item)) {
+                checkItem(callback, item, key)
             }
         }
     }
@@ -91,9 +87,9 @@ export async function GET({ fetch, params}) {
     const manifest = loadedFiles.get(manifestFile);
 
     // substitue json file aliases for loaded data
-    for (const [name, jsonData] of loadedFiles) {
+    loadedFiles.forEach(jsonData => {
         findInnerJson(jsonData, (k:any, i:any) => i[k] = loadedFiles.get(i[k]));
-    }
+    });
 
 	return json({
 		manifestFile,
