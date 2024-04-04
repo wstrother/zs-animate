@@ -14,16 +14,6 @@ async function loadTextures(textures: Record<string, string>): Promise<Record<st
     return await Assets.load(Object.keys(textures));
 }
 
-// load JSON resources
-async function loadJSON(jsonFiles: Record<string, string>): Promise<Record<string, {}>> {
-
-    for (const key in jsonFiles) {
-        const src = jsonFiles[key];
-        Assets.add({alias: key, src: `/json/${src}`});
-    }
-
-    return await Assets.load(Object.keys(jsonFiles));
-}
 
 // parse sprite sheet data
 async function loadSheets(textures: Record<string, Texture>, sheets: Record<string, SpritesheetData>) {
@@ -41,6 +31,7 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 
     return spriteSheets;
 }
+
 
 // instantiate starting sprites from manifest
 function addSprites(sprites: Record<string, SpriteData>, {textures, spritesheets, stage}: AppContext): Record<string, Sprite> {
@@ -66,7 +57,6 @@ export default {
     createApp: async (canvasElement: HTMLElement, manifest: Manifest): Promise<{
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
-        jsonFiles: Record<string, {}>,
         stage: Container,
         destroy: Function 
     }> => {
@@ -86,16 +76,12 @@ export default {
         const spritesheets = await loadSheets(textures, manifest.spritesheets);
         // console.log(spritesheets);
 
-        const jsonFiles = await loadJSON(manifest.json);
-        // console.log(jsonFiles);
-
         const sprites = addSprites(manifest.sprites, {textures, spritesheets, stage});
         // console.log(sprites);
 
         return {
             textures,
             spritesheets,
-            jsonFiles,
             stage,
             destroy: () => {
                 app.destroy({removeView: true});

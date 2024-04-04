@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import { loadedJSON, loadedSpritesheets, loadedTextures, appStage } from '$lib/stores.js';
+    import { loadedSpritesheets, loadedTextures, appStage } from '$lib/stores.js';
     import create from '$lib/create';
     
     export let data;
@@ -11,28 +11,26 @@
     const loadApp = async () => {
         if (destroyApp) destroyApp();
 
-        // if (!data.manifestError) {
-        //     const canvasElement = document.getElementById('appCanvas');
-        //     if (canvasElement) {
-        //         await data.animate.createApp(canvasElement, data.manifest)
-        //             .then(({ textures, spritesheets, jsonFiles, stage, destroy }) => {
-        //                 loadedTextures.set(textures);
-        //                 loadedJSON.set(jsonFiles);
-        //                 loadedSpritesheets.set(spritesheets);
-        //                 appStage.set(stage);
-        //                 destroyApp = destroy;
-        //             });
-        //     }
-        // }
-
         const resp = await fetch(`/api/json/${data.manifestFile}`);
-        if (resp.ok) {
-            manifestError = false;
-            const jsonData = await resp.json();
-            console.log(jsonData);
-        } else {
+        if (!resp.ok) {
             manifestError = true;
             manifestErrMessage = resp.statusText;
+            return;
+        }
+
+        manifestError = false;
+        const jsonData = await resp.json();
+        console.log(jsonData);
+
+        const canvasElement = document.getElementById('appCanvas');
+        if (canvasElement) {
+            await create.createApp(canvasElement, jsonData)
+                .then(({ textures, spritesheets, stage, destroy }) => {
+                    loadedTextures.set(textures);
+                    loadedSpritesheets.set(spritesheets);
+                    appStage.set(stage);
+                    destroyApp = destroy;
+                });
         }
     }
 </script>
