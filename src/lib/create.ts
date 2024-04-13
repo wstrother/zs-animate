@@ -34,12 +34,12 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 
 
 // instantiate starting sprites from manifest
-function addEntities(entities: Record<string, EntityData>, {textures, spritesheets, stage}: AppContext): Record<string, Entity> {
+function addEntities(entities: Record<string, EntityData>, ctx: AppContext): Record<string, Entity> {
     const createdEntities: Record<string, Entity> = {};
     for (const key in entities) {
         try {
             if (!entities[key].name) entities[key].name = key;
-            const entity = createEntity(entities[key], {textures, spritesheets, stage});
+            const entity = createEntity(entities[key], ctx);
             createdEntities[key] = entity;
         } catch (error) {
             console.log(`Error creating entity '${key}':\n`, error);
@@ -79,7 +79,7 @@ export default {
         const spritesheets = await loadSheets(textures, manifest.spritesheets);
         // console.log(spritesheets);
 
-        const sprites = addEntities(manifest.entities, {textures, spritesheets, stage});
+        const entities = addEntities(manifest.entities, {textures, spritesheets, app});
         // console.log(sprites);
 
         // app.ticker.add(() => {

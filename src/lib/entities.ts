@@ -1,12 +1,14 @@
-import type { Sprite } from "pixi.js";
-import type { AppContext, EntityData } from "./types";
+import type { AppContext, EntityData, UpdateMethodData } from "./types";
 import { createSprite } from "./sprites";
+import { ImageGraphics } from "./components/graphics";
 
 export class Entity {
     name: string;
     visible: boolean;
     paused: boolean;
     spawned: boolean;
+    components: Map<string, {}>;
+    updateMethods: Array<Function>;
 
     constructor(name: string) {
         this.name = name;
@@ -15,167 +17,58 @@ export class Entity {
         this.paused = false;
         this.spawned = false;
 
-        // this.layer = null;
-        // this.group = null;
-        // this._position = new Vector2(0, 0);
-
-        // this.updateMethods = [];
-        
-        // this._components = [];
-        // this._componentUpdates = new Map();
-
-        // this.addComponent('events', new EventEmitter(this));
+        this.components = new Map();
+        this.updateMethods = [];
     }
 
-    // addComponent(name, component, replace=false) {
-    //     if (this[name] && !replace) {
-    //         throw Error(`${this.name} already has a component called ${name}`);
-    //     }
-        
-    //     this.removeComponent(name);
-    //     this._components.push(name);
-    //     this[name] = component;
-
-    //     if (component['update']) {
-    //         let method = (...args) => { component.update(...args); }
-
-    //         this.updateMethods.push(method);
-    //         this._componentUpdates.set(name, method);
-    //     }
-    // }
-
-    // removeComponent(name) {
-    //     if (this[name] && !this._components.includes(name)) {
-    //         throw Error(`${this.name}.${name} is not a component`);
-    //     }
-
-    //     delete this[name];
-    //     if (this._componentUpdates.has(name)) {
-    //         let method = this._componentUpdates.get(name);
-    //         this.updateMethods.pop(
-    //             this.updateMethods.findIndex(m => m === method)
-    //         );
-    //         this._componentUpdates.delete(name);
-    //     }
-    // }
-
-    // setVisible(bool: boolean) {
-    //     this.visible = bool;
-    // }
-
-    // setPaused(bool) {
-    //     this.paused = bool;
-    // }
-
-    // get position() {
-    //     return this._position.coordinates;
-    // }
-
-    // setPosition(...position) {
-    //     this._position.set(...position);
-    // }
-
-    // setLayer(layer) {
-    //     this.layer = layer;
-    //     layer.addEntity(this);
-    // }
-
-    // setGroup(group) {
-    //     this.group = group;
-    //     group.addEntity(this);
-    // }
-
-    // move(...args) {
-    //     this._position.move(...args);
-    // }
-
-    update(...args: any[]) {
+    update() {
         if (!this.spawned) {
             this.spawned = true;
-            // this.events.emit('spawn', this);
         }
 
-        // this.updateMethods.forEach(method => {
-        //     method(...args);
-        // });
-    }   
-}
+        if (this.paused) return;
 
-
-class Graphics {
-    entity: Entity;
-
-    constructor(entity: Entity) {
-        this.entity = entity;
-    }
-
-    draw() {
-        throw Error("Graphics is an abstract base class, draw() should be implemented by a sub class");
+        this.updateMethods.forEach(method => {
+            method();
+        });
     }
 }
 
 
-export class ImageGraphics extends Graphics {
-    sprite: Sprite
+function getUpdateMethod(entity: Entity, data: UpdateMethodData): Function {
+    let obj: {} | undefined = entity;
 
-    constructor(entity: Entity, sprite: Sprite) {
-        super(entity);
-        this.sprite = sprite;
-        // this.sprite.anchor.set(0.5, 0.5);
-        // this.sprite.roundPixels = true;
+    if (data.component) {
+        obj = entity.components.get(data.component);
+
+        if (!obj) throw Error(`Entity '${entity.name}' has no component '${data.component}'`);
     }
 
-    // get width() {
-    //     return this.sprite.width;
-    // }
+    // @ts-ignore
+    const method: Function = obj[data.method];
 
-    // get height() {
-    //     return this.sprite.height;
-    // }
+    if (typeof method !== 'function') throw Error(`Component '${data.component} is not a method`);
 
-    // get size() {
-    //     return [this.width, this.height]
-    // }
-
-    // scaleSprite(sprite, scaleX, scaleY) {
-    //     sprite.setTransform(sprite.x, sprite.y, scaleX, scaleY);
-    // }
-    
-    // setScale(scaleX, scaleY) {
-    //     this.scaleSprite(this.sprite, scaleX, scaleY);
-    // }
-
-    // setMirror(mirrorX, mirrorY) {
-    //     this.setScale(
-    //         mirrorX ? -1 : 1,
-    //         mirrorY ? -1 : 1
-    //     );
-    // }
-
-    // setDrawPoint(sprite, [x, y]) {
-    //     let [w, h] = [sprite.width, sprite.height];
-    //     x += w / 2;
-    //     y += h / 2;
-
-    //     sprite.x = x;
-    //     sprite.y = y;
-    // }
-
-    // drawSprite(container, sprite, position) {
-    //     this.setDrawPoint(sprite, position);
-    //     container.addChild(sprite);
-    // }
-    
-    // draw(container) {
-    //     this.drawSprite(container, this.sprite, this.entity.position);
-    // }
+    return () => method.bind(obj)(data);
 }
 
 
 export function createEntity(data: EntityData, ctx: AppContext) {
     const entity = new Entity(data?.name ?? '');
-    const graphics = new ImageGraphics(entity, createSprite(data.sprite, ctx));
-    ctx.stage.addChild(graphics.sprite);
+
+    if (data.sprite) {
+        const graphics = new ImageGraphics(entity, createSprite(data.sprite, ctx));
+        ctx.app.stage.addChild(graphics.sprite);
+        entity.components.set(ImageGraphics.name, graphics);
+    }
+
+    if (data.updateMethods) {
+        for (const methodData of data.updateMethods) {
+            entity.updateMethods.push(getUpdateMethod(entity, methodData));
+        }
+    }
+
+    ctx.app.ticker.add(() => entity.update());
 
     return entity;
 }

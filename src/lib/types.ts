@@ -1,4 +1,4 @@
-import type { ApplicationOptions, Container, Spritesheet, SpritesheetData, Texture } from "pixi.js"
+import type { Application, ApplicationOptions, Spritesheet, SpritesheetData, Texture } from "pixi.js"
 
 type PointData = [number, number] | {x: number, y: number}
 
@@ -10,9 +10,16 @@ export type SpriteData = {
     position?: PointData
 }
 
+export type UpdateMethodData = {
+    component?: string,
+    method: string,
+    [key:string]: string|number|boolean|undefined,
+}
+
 export type EntityData = {
     name?: string,
-    sprite: SpriteData
+    sprite?: SpriteData,
+    updateMethods?: Array<UpdateMethodData>
 }
 
 export type Manifest = {
@@ -24,7 +31,7 @@ export type Manifest = {
 }
 
 export type AppContext = {
-    stage: Container,
+    app: Application,
     textures: Record<string, Texture>,
     spritesheets: Record<string, Spritesheet>,
     jsonFiles?: Record<string, {}>
