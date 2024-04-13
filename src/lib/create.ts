@@ -57,8 +57,12 @@ export default {
     createApp: async (canvasElement: HTMLElement, manifest: Manifest): Promise<{
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
-        stage: Container,
-        destroy: Function 
+        // stage: Container,
+        app: Application,
+        destroy: Function,
+        start: Function,
+        stop: Function,
+        update: Function
     }> => {
         const app = new Application();
         const stage = app.stage;
@@ -79,12 +83,27 @@ export default {
         const sprites = addSprites(manifest.sprites, {textures, spritesheets, stage});
         // console.log(sprites);
 
+        app.ticker.add(() => {
+            for (const sprite in sprites) {
+                sprites[sprite].rotation += 0.02;
+            }
+        })
+
         return {
             textures,
             spritesheets,
-            stage,
+            app,
             destroy: () => {
                 app.destroy({removeView: true});
+            },
+            start: () => {
+                app.ticker.start();
+            },
+            stop: () => {
+                app.ticker.stop();
+            },
+            update: () => {
+                app.ticker.update();
             }
         }
     }

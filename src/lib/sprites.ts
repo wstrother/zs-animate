@@ -5,9 +5,9 @@ import type { AppContext, SpriteData } from "./types";
 export function createSprite(data: SpriteData, {textures, spritesheets}: AppContext): Sprite {
     // replace texture and spritesheet aliases
     if (data.texture && typeof data.texture === 'string') data.texture = textures[data.texture];
+    
     if (data.spritesheet && typeof data.spritesheet === 'string') {
         data.spritesheet = spritesheets[data.spritesheet];
-        // TODO: assign texture field from spritesheet
         data.texture = data.spritesheet.textures[data.frame ?? '']
     }
 
