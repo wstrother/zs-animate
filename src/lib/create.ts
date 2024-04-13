@@ -1,6 +1,6 @@
 import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite, type SpriteOptions } from "pixi.js";
-import type { AppContext, Manifest, SpriteData } from "./types";
-import { createSprite } from "./sprites";
+import type { AppContext, EntityData, Manifest } from "./types";
+import { createEntity, type Entity } from "./entities";
 
 
 // load image textures
@@ -34,19 +34,19 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 
 
 // instantiate starting sprites from manifest
-function addSprites(sprites: Record<string, SpriteData>, {textures, spritesheets, stage}: AppContext): Record<string, Sprite> {
-    const createdSprites: Record<string, Sprite> = {};
-    for (const key in sprites) {
+function addEntities(entities: Record<string, EntityData>, {textures, spritesheets, stage}: AppContext): Record<string, Entity> {
+    const createdEntities: Record<string, Entity> = {};
+    for (const key in entities) {
         try {
-            const sprite = createSprite(sprites[key], {textures, spritesheets, stage});
-            stage.addChild(sprite);
-            createdSprites[key] = sprite;
+            if (!entities[key].name) entities[key].name = key;
+            const entity = createEntity(entities[key], {textures, spritesheets, stage});
+            createdEntities[key] = entity;
         } catch (error) {
-            console.log(`Error creating sprite '${key}':\n`, error);
+            console.log(`Error creating entity '${key}':\n`, error);
         }
     }
 
-    return createdSprites;
+    return createdEntities;
 }
 
 
@@ -57,7 +57,6 @@ export default {
     createApp: async (canvasElement: HTMLElement, manifest: Manifest): Promise<{
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
-        // stage: Container,
         app: Application,
         destroy: Function,
         start: Function,
@@ -80,14 +79,14 @@ export default {
         const spritesheets = await loadSheets(textures, manifest.spritesheets);
         // console.log(spritesheets);
 
-        const sprites = addSprites(manifest.sprites, {textures, spritesheets, stage});
+        const sprites = addEntities(manifest.entities, {textures, spritesheets, stage});
         // console.log(sprites);
 
-        app.ticker.add(() => {
-            for (const sprite in sprites) {
-                sprites[sprite].rotation += 0.02;
-            }
-        })
+        // app.ticker.add(() => {
+        //     for (const sprite in sprites) {
+        //         sprites[sprite].rotation += 0.02;
+        //     }
+        // })
 
         return {
             textures,

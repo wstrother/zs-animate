@@ -26,5 +26,7 @@ export function createSprite(data: SpriteData, {textures, spritesheets}: AppCont
         data[key] = {x: point[0], y: point[1]}
     }
 
-    return new Sprite({...data as SpriteOptions})
+    const sprite = new Sprite({...data as SpriteOptions});
+    sprite.texture._source.scaleMode = 'nearest';
+    return sprite;
 }

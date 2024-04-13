@@ -10,11 +10,16 @@ export type SpriteData = {
     position?: PointData
 }
 
+export type EntityData = {
+    name?: string,
+    sprite: SpriteData
+}
+
 export type Manifest = {
     textures: Record<string, string>,
     spritesheets: Record<string, SpritesheetData>,
     json: Record<string, string>,
-    sprites: Record<string, {}>,
+    entities: Record<string, EntityData>,
     init?: ApplicationOptions
 }
 
