@@ -40,7 +40,7 @@ export class AnimationGraphics extends ImageGraphics {
         this.spritesheet = spritesheet;
         this.animationCounter = 0;
 
-        entity.addUpdateMethod({component: this.name, method: this.updateAnimation.name});
+        entity.updateMethods.push(() => this.updateAnimation());
     }
 
     get animation(): Array<Texture> {
