@@ -7,7 +7,9 @@ export type SpriteData = {
     spritesheet?: string | Spritesheet,
     frame?: string,
     scale?: PointData,
-    position?: PointData
+    position?: PointData,
+    graphics?: 'animation'|'image',
+    state?: string
 }
 
 export type UpdateMethodData = {

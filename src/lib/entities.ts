@@ -1,10 +1,12 @@
-import type { AppContext, EntityData, UpdateMethodData } from "./types";
+import type { AppContext, EntityData, SpriteData, UpdateMethodData } from "./types";
 import { createSprite } from "./sprites";
-import { ImageGraphics } from "./components/graphics";
+import { AnimationGraphics, ImageGraphics } from "./components/graphics";
+import type { Sprite, Spritesheet } from "pixi.js";
 
+
+// base entity container, stores components and manages update methods
 export class Entity {
     name: string;
-    visible: boolean;
     paused: boolean;
     spawned: boolean;
     components: Map<string, {}>;
@@ -13,7 +15,6 @@ export class Entity {
     constructor(name: string) {
         this.name = name;
 
-        this.visible = true;
         this.paused = false;
         this.spawned = false;
 
@@ -32,24 +33,45 @@ export class Entity {
             method();
         });
     }
+
+    addUpdateMethod(data: UpdateMethodData) {
+        let obj: {} | undefined = this;
+    
+        if (data.component) {
+            obj = this.components.get(data.component);
+    
+            if (!obj) throw Error(`Entity '${this.name}' has no component '${data.component}'`);
+        }
+    
+        // @ts-ignore
+        const method: Function = obj[data.method];
+    
+        if (typeof method !== 'function') throw Error(`Component '${data.component} is not a method`);
+    
+        this.updateMethods.push(
+            () => method.bind(obj)(data)
+        );
+    }
 }
 
 
-function getUpdateMethod(entity: Entity, data: UpdateMethodData): Function {
-    let obj: {} | undefined = entity;
 
-    if (data.component) {
-        obj = entity.components.get(data.component);
 
-        if (!obj) throw Error(`Entity '${entity.name}' has no component '${data.component}'`);
+type SpriteGraphics = ImageGraphics|AnimationGraphics;
+
+function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): SpriteGraphics {
+    if (data.graphics === 'image' || data.graphics === undefined) {
+        return new ImageGraphics(entity, sprite);
+
+    } else if (data.graphics === 'animation') {
+        const graphics = new AnimationGraphics(entity, sprite, data.spritesheet as Spritesheet);
+        if (data.state) graphics.state = data.state;
+
+        return graphics;
+
+    } else {
+        throw Error(`Could not generate sprite graphics for ${entity.name}`);
     }
-
-    // @ts-ignore
-    const method: Function = obj[data.method];
-
-    if (typeof method !== 'function') throw Error(`Component '${data.component} is not a method`);
-
-    return () => method.bind(obj)(data);
 }
 
 
@@ -57,15 +79,17 @@ export function createEntity(data: EntityData, ctx: AppContext) {
     const entity = new Entity(data?.name ?? '');
 
     if (data.sprite) {
-        const graphics = new ImageGraphics(entity, createSprite(data.sprite, ctx));
+        // generate graphics
+        const sprite = createSprite(data.sprite, ctx);
+        const graphics: SpriteGraphics = getSpriteGraphics(entity, sprite, data.sprite);
+
+        // add to scene
         ctx.app.stage.addChild(graphics.sprite);
-        entity.components.set(ImageGraphics.name, graphics);
     }
 
-    if (data.updateMethods) {
-        for (const methodData of data.updateMethods) {
-            entity.updateMethods.push(getUpdateMethod(entity, methodData));
-        }
+    // add specified update methods
+    for (const methodData of data.updateMethods ?? []) {
+        entity.addUpdateMethod(methodData);
     }
 
     ctx.app.ticker.add(() => entity.update());

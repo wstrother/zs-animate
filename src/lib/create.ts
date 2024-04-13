@@ -82,12 +82,6 @@ export default {
         const entities = addEntities(manifest.entities, {textures, spritesheets, app});
         // console.log(sprites);
 
-        // app.ticker.add(() => {
-        //     for (const sprite in sprites) {
-        //         sprites[sprite].rotation += 0.02;
-        //     }
-        // })
-
         return {
             textures,
             spritesheets,

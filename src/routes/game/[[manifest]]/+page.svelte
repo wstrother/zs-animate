@@ -23,7 +23,6 @@
 
         manifestError = false;
         const jsonData = await resp.json();
-        console.log(jsonData);
 
         const canvasElement = document.getElementById('appCanvas');
         if (canvasElement) {
