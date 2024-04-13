@@ -1,7 +1,6 @@
-import type { AppContext, EntityData, SpriteData, UpdateMethodData } from "./types";
+import type { AppContext, EntityData, UpdateMethodData } from "./types";
 import { createSprite } from "./sprites";
-import { AnimationGraphics, ImageGraphics } from "./components/graphics";
-import type { Sprite, Spritesheet } from "pixi.js";
+import { type SpriteGraphics, getSpriteGraphics } from "./sprites";
 
 
 // base entity container, stores components and manages update methods
@@ -51,26 +50,6 @@ export class Entity {
         this.updateMethods.push(
             () => method.bind(obj)(data)
         );
-    }
-}
-
-
-
-
-type SpriteGraphics = ImageGraphics|AnimationGraphics;
-
-function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): SpriteGraphics {
-    if (data.graphics === 'image' || data.graphics === undefined) {
-        return new ImageGraphics(entity, sprite);
-
-    } else if (data.graphics === 'animation') {
-        const graphics = new AnimationGraphics(entity, sprite, data.spritesheet as Spritesheet);
-        if (data.state) graphics.state = data.state;
-
-        return graphics;
-
-    } else {
-        throw Error(`Could not generate sprite graphics for ${entity.name}`);
     }
 }
 

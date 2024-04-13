@@ -1,5 +1,9 @@
-import { Sprite, type SpriteOptions } from "pixi.js";
+import { Sprite, Spritesheet, type SpriteOptions } from "pixi.js";
 import type { AppContext, SpriteData } from "./types";
+import { Entity } from "./entities";
+import { ImageGraphics, AnimationGraphics } from "./components/graphics";
+
+export type SpriteGraphics = ImageGraphics | AnimationGraphics;
 
 
 export function createSprite(data: SpriteData, {textures, spritesheets}: AppContext): Sprite {
@@ -29,4 +33,20 @@ export function createSprite(data: SpriteData, {textures, spritesheets}: AppCont
     const sprite = new Sprite({...data as SpriteOptions});
     sprite.texture.source.scaleMode = 'nearest';
     return sprite;
+}
+
+
+export function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): SpriteGraphics {
+    if (data.graphics === 'image' || data.graphics === undefined) {
+        return new ImageGraphics(entity, sprite);
+
+    } else if (data.graphics === 'animation') {
+        const graphics = new AnimationGraphics(entity, sprite, data.spritesheet as Spritesheet);
+        if (data.state) graphics.state = data.state;
+
+        return graphics;
+
+    } else {
+        throw Error(`Could not generate sprite graphics for ${entity.name}`);
+    }
 }
