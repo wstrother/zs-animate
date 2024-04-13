@@ -40,6 +40,7 @@ async function loadJsonRecursively(
 
     // Check for infinite loops at the current recursion level
     if (searchedFiles) {
+        searchedFiles = new Set(searchedFiles);     // make a shallow copy for each branch of recursion
         if (searchedFiles.has(filename)) {
             throw new Error('Infinite recursion');
         }
