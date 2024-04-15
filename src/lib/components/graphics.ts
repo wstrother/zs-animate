@@ -33,12 +33,14 @@ export class AnimationGraphics extends ImageGraphics {
     state: string;
     spritesheet: Spritesheet;
     animationCounter: number;
+    frameCounter: number;
 
     constructor(entity: Entity, sprite: Sprite, spritesheet: Spritesheet) {
         super(entity, sprite);
         this.state = '';
         this.spritesheet = spritesheet;
         this.animationCounter = 0;
+        this.frameCounter = 0;
 
         entity.updateMethods.push(() => this.updateAnimation());
     }
@@ -73,6 +75,11 @@ export class AnimationGraphics extends ImageGraphics {
         this.sprite.texture = this.animation[this.animationIndex];
         this.sprite.texture.source.scaleMode = 'nearest';
 
-        this.animationCounter = (this.animationCounter + (1 / this.frameLength)) % this.animation.length;
+        console.log(this.frameCounter, this.animationCounter);
+        if (this.frameCounter < this.frameLength - 1) this.frameCounter++; 
+        else {
+            this.animationCounter = (this.animationCounter + 1) % this.animation.length;
+            this.frameCounter = 0;
+        }
     }
 }
