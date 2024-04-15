@@ -1,5 +1,5 @@
 import { Spritesheet, Texture, type SpritesheetFrameData } from "pixi.js";
-import type { AnimationSheetData, AnimationFrameData } from "./types";
+import type { AnimationSheetData, AnimationFrameData, RectData } from "./types";
 
 // This module creates an interface for parsing animation data 
 // in a flexible variety of different formats/specifications
@@ -8,21 +8,38 @@ import type { AnimationSheetData, AnimationFrameData } from "./types";
 
 //      TO IMPLEMENT:
 //          pixel precise frames
-//          mirrored frames
 //          animation frame list aliases
 //          sub sprites
+//          arbitrary transforms
+//              - offset
+//              - scale
+//              - rotation
+//              - flip
 
-function getPixiFrame(data: AnimationSheetData, frame: AnimationFrameData): SpritesheetFrameData {
-    const [cw, ch] = data.meta.cellSize;
-    return {
-        ...frame,
-        "frame": {
-            x: cw * frame.position[0], 
-            y: ch * frame.position[1], 
-            w: cw, 
-            h: ch
+
+function getRectFromCell(cellSize: [number, number], cellPos: [number, number]): RectData {
+    const [w, h] = cellSize;
+    const [cx, cy] = cellPos;
+
+    return { x: w * cx, y: h * cy, w, h }
+}
+
+
+function getPixiFrame(data: AnimationSheetData, frameData: AnimationFrameData): SpritesheetFrameData {
+    let rect: RectData;
+
+    if (frameData.position) {
+        rect = getRectFromCell(data.meta.cellSize, frameData.position);
+    } else {
+        rect = {
+            x: frameData.x ?? 0,
+            y: frameData.y ?? 0,
+            w: frameData.w ?? 0,
+            h: frameData.h ?? 0
         }
-    };
+    }
+
+    return {...frameData, frame: rect};
 }
 
 export function createSpritesheetData(texture: Texture, json: AnimationSheetData): Spritesheet {

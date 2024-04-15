@@ -2,11 +2,16 @@ import type { Application, ApplicationOptions, Spritesheet, Texture } from "pixi
 
 
 // GENERAL DATA TYPES
-type PointData = [number, number] | {x: number, y: number}
+export type PointData = [number, number] | {x: number, y: number}
+export type RectData = {x: number, y: number, w: number, h: number}
 
 // ANIMATION DATA TYPES
 export type AnimationFrameData = {
-    position: [number, number]
+    position?: [number, number],
+    x?: number,
+    y?: number,
+    w?: number,
+    h?: number
 }
 export type AnimationData = {
     name: string,

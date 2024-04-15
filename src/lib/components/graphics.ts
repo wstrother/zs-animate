@@ -75,7 +75,6 @@ export class AnimationGraphics extends ImageGraphics {
         this.sprite.texture = this.animation[this.animationIndex];
         this.sprite.texture.source.scaleMode = 'nearest';
 
-        console.log(this.frameCounter, this.animationCounter);
         if (this.frameCounter < this.frameLength - 1) this.frameCounter++; 
         else {
             this.animationCounter = (this.animationCounter + 1) % this.animation.length;
