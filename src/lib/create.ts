@@ -1,6 +1,7 @@
-import { Application, Assets, Texture, Spritesheet, type SpritesheetData, Container, Sprite, type SpriteOptions } from "pixi.js";
-import type { AppContext, EntityData, Manifest } from "./types";
+import { Application, Assets, Texture, Spritesheet } from "pixi.js";
+import type { AnimationSheetData, AppContext, EntityData, Manifest } from "./types";
 import { createEntity, type Entity } from "./entities";
+import { createSpritesheetData as createSpritesheet } from "./animations";
 
 
 // load image textures
@@ -16,14 +17,14 @@ async function loadTextures(textures: Record<string, string>): Promise<Record<st
 
 
 // parse sprite sheet data
-async function loadSheets(textures: Record<string, Texture>, sheets: Record<string, SpritesheetData>) {
+async function loadSheets(textures: Record<string, Texture>, sheets: Record<string, AnimationSheetData>) {
     const spriteSheets: Record<string, Spritesheet> = {}
 
     for (const key in sheets) {
         const meta = sheets[key].meta;
         if (meta.image) {
             const texture = textures[meta.image];
-            const sheet = new Spritesheet(texture, sheets[key]);
+            const sheet = createSpritesheet(texture, sheets[key]);
             await sheet.parse();
             spriteSheets[key] = sheet;
         }
