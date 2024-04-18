@@ -7,7 +7,6 @@ import type { AnimationSheetData, AnimationFrameData, RectData } from "./types";
 // the specifications of the PIXI.js spritesheet API
 
 //      TO IMPLEMENT:
-//          pixel precise frames
 //          animation frame list aliases
 //          sub sprites
 //          arbitrary transforms

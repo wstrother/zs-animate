@@ -35,13 +35,13 @@ async function loadSheets(textures: Record<string, Texture>, sheets: Record<stri
 
 
 // instantiate starting sprites from manifest
-function addEntities(entities: Record<string, EntityData>, ctx: AppContext): Record<string, Entity> {
-    const createdEntities: Record<string, Entity> = {};
+function addEntities(entities: Record<string, EntityData>, ctx: AppContext): Array<Entity> {
+    const createdEntities: Array<Entity> = [];
     for (const key in entities) {
         try {
             if (!entities[key].name) entities[key].name = key;
             const entity = createEntity(entities[key], ctx);
-            createdEntities[key] = entity;
+            createdEntities.push(entity);
         } catch (error) {
             console.log(`Error creating entity '${key}':\n`, error);
         }
@@ -58,6 +58,7 @@ export default {
     createApp: async (canvasElement: HTMLElement, manifest: Manifest): Promise<{
         textures: Record<string, Texture>,
         spritesheets: Record<string, Spritesheet>,
+        entities: Array<Entity>
         app: Application,
         destroy: Function,
         start: Function,
@@ -65,7 +66,6 @@ export default {
         update: Function
     }> => {
         const app = new Application();
-        const stage = app.stage;
         const appOptions = manifest.init
 
         await app.init({ 
@@ -86,6 +86,7 @@ export default {
         return {
             textures,
             spritesheets,
+            entities,
             app,
             destroy: () => {
                 app.destroy({removeView: true});
