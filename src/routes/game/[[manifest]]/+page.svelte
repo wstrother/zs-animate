@@ -2,6 +2,7 @@
     import { loadedSpritesheets, loadedTextures, appStage, loadedEntities } from '$lib/stores.js';
     import create from '$lib/create';
 	import Entity from '$lib/ui/entity.svelte';
+	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
     
     export let data;
     let destroyApp: undefined | Function;
@@ -77,12 +78,17 @@
     <div class="m-5">
         <div class="h3">Entities</div>
 
-        <div id="entities-list flex flex-col">
+        <Accordion autocollapse>
             {#each $loadedEntities as entity }
-                <Entity {entity} />
+                <AccordionItem>
+                    <svelte:fragment slot="summary">{entity.name}</svelte:fragment>
+                    <svelte:fragment slot="content">
+                        <Entity {entity} />
+                    </svelte:fragment>
+                </AccordionItem>
             {/each}
+        </Accordion>
 
-        </div>
     </div>
 </div>
 
