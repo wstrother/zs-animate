@@ -1,7 +1,19 @@
-import type { AppContext, EntityData, UpdateMethodData } from "./types";
-import { createSprite } from "./sprites";
-import { type SpriteGraphics, getSpriteGraphics } from "./sprites";
-import type { EntityComponent } from "./components/components";
+import type { UpdateMethodData } from "./types";
+import type { Container } from "pixi.js";
+
+
+// base component of an entity instance
+export class EntityComponent {
+    entity: Entity;
+    name: string;
+
+    constructor(entity: Entity, name: string) {
+        this.entity = entity;
+        this.name = name;
+        entity.components.set(this.name, this);
+    }
+}
+
 
 
 // base entity container, stores components and manages update methods
@@ -11,6 +23,7 @@ export class Entity {
     spawned: boolean;
     components: Map<string, EntityComponent>;
     updateMethods: Array<Function>;
+    container: Container | undefined;
 
     constructor(name: string) {
         this.name = name;
@@ -20,7 +33,11 @@ export class Entity {
 
         this.components = new Map();
         this.updateMethods = [];
+
+        
     }
+
+    // UPDATE METHODS
 
     update() {
         if (!this.spawned) {
@@ -55,24 +72,4 @@ export class Entity {
 }
 
 
-export function createEntity(data: EntityData, ctx: AppContext) {
-    const entity = new Entity(data?.name ?? '');
 
-    if (data.sprite) {
-        // generate graphics
-        const sprite = createSprite(data.sprite, ctx);
-        const graphics: SpriteGraphics = getSpriteGraphics(entity, sprite, data.sprite);
-
-        // add to scene
-        ctx.app.stage.addChild(graphics.sprite);
-    }
-
-    // add specified update methods
-    for (const methodData of data.updateMethods ?? []) {
-        entity.addUpdateMethod(methodData);
-    }
-
-    ctx.app.ticker.add(() => entity.update());
-
-    return entity;
-}

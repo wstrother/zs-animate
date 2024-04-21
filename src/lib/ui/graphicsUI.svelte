@@ -1,6 +1,7 @@
 <script lang='ts'>
-    import type { EntityComponent } from "$lib/components/components";
-	import { AnimationGraphics, ImageGraphics } from "$lib/components/graphics";
+	import { AnimationGraphics, ImageGraphics } from '$lib/components/graphics';
+	import type { EntityComponent } from '$lib/entities';
+
     
     import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
     let activeState: string;

@@ -1,7 +1,8 @@
 import { Application, Assets, Texture, Spritesheet } from "pixi.js";
-import type { AnimationSheetData, AppContext, EntityData, Manifest } from "./types";
-import { createEntity, type Entity } from "./entities";
-import { createSpritesheetData as createSpritesheet } from "./animations";
+import type { AnimationSheetData, AppContext, EntityData, Manifest } from "../types";
+import { type Entity } from "../entities";
+import { createEntity } from "./createEntities";
+import { createSpritesheetData as createSpritesheet } from "../animations";
 
 
 // load image textures

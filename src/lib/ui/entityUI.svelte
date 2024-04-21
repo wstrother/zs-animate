@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { Entity } from "$lib/entities";
-	import Graphics from "./graphics.svelte";
+	import GraphicsUi from "./graphicsUI.svelte";
     export let entity: Entity;
 
     const togglePause = () => {
@@ -17,6 +17,6 @@
         </div>
     
         {#if entity.components.has('Graphics')}
-            <Graphics graphics={entity.components.get('Graphics')} />
+            <GraphicsUi graphics={entity.components.get('Graphics')} />
         {/if}
 </div>

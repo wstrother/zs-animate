@@ -1,6 +1,18 @@
 import { Entity } from "$lib/entities";
-import { EntityComponent } from "./components";
-import type { Sprite, Spritesheet, SpritesheetFrameData, Texture } from "pixi.js";
+import type { RectData } from "$lib/types";
+import { EntityComponent } from "$lib/entities";
+import type { Container, Sprite, Spritesheet, SpritesheetFrameData, Texture } from "pixi.js";
+
+
+export class RectGraphics extends EntityComponent {
+    rects: RectData[];
+
+    constructor(entity: Entity) {
+        super(entity, "RectGraphics");
+        this.rects = [];
+    }
+
+}
 
 
 export class ImageGraphics extends EntityComponent {
@@ -11,10 +23,18 @@ export class ImageGraphics extends EntityComponent {
         this.sprite = sprite;
     }
 
-    // UPDATE METHODS
-    rotateSprite({angle}: {angle: number}) {
-        this.sprite.rotation += angle;
+    addToScene(container: Container) {
+        container.addChild(this.sprite);
     }
+
+    removeFromScene(container: Container) {
+        container.removeChild(this.sprite);
+    }
+
+    // UPDATE METHODS
+    // rotateSprite({angle}: {angle: number}) {
+    //     this.sprite.rotation += angle;
+    // }
 }
 
 

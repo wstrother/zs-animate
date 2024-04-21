@@ -1,7 +1,8 @@
 import { Sprite, Spritesheet, type SpriteOptions } from "pixi.js";
-import type { AppContext, SpriteData } from "./types";
-import { Entity } from "./entities";
-import { ImageGraphics, AnimationGraphics } from "./components/graphics";
+import type { AppContext, EntityData, SpriteData } from "../types";
+import { Entity } from "../entities";
+import { ImageGraphics, AnimationGraphics } from "../components/graphics";
+// import type { SpriteGraphics } from "./createEntities";
 
 export type SpriteGraphics = ImageGraphics | AnimationGraphics;
 
@@ -50,3 +51,26 @@ export function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteDa
         throw Error(`Could not generate sprite graphics for ${entity.name}`);
     }
 }
+
+export function createEntity(data: EntityData, ctx: AppContext) {
+    const entity = new Entity(data?.name ?? '');
+
+    if (data.sprite) {
+        // generate graphics
+        const sprite = createSprite(data.sprite, ctx);
+        const graphics: SpriteGraphics = getSpriteGraphics(entity, sprite, data.sprite);
+
+        // add to scene
+        ctx.app.stage.addChild(graphics.sprite);
+    }
+
+    // add specified update methods
+    for (const methodData of data.updateMethods ?? []) {
+        entity.addUpdateMethod(methodData);
+    }
+
+    ctx.app.ticker.add(() => entity.update());
+
+    return entity;
+}
+

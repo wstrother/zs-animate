@@ -1,8 +1,10 @@
 <script lang='ts'>
     import { loadedSpritesheets, loadedTextures, appStage, loadedEntities } from '$lib/stores.js';
-    import create from '$lib/create';
-	import Entity from '$lib/ui/entity.svelte';
+    import create from '$lib/create/createApp.js';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import type { Entity } from '$lib/entities.js';
+	import EntityUi from '$lib/ui/entityUI.svelte';
+	import { Graphics } from 'pixi.js';
     
     export let data;
     let destroyApp: undefined | Function;
@@ -10,8 +12,7 @@
     let _stopApp: undefined | Function;
     let _updateApp: undefined | Function;
     let manifestError: boolean = false;
-    let manifestErrMessage: string = '';
-    
+    let manifestErrMessage: string = '';    
     
     const loadApp = async () => {
         if (destroyApp) destroyApp();
@@ -51,6 +52,24 @@
     const updateApp = () => {
         if (_updateApp) _updateApp();
     }
+
+    let selectedEntity: Entity | undefined;
+    let selectedGraphics: Graphics | undefined;
+
+    const selectEntity = (e: Entity) => {
+        if (selectedEntity !== e) {
+            selectedEntity = e;
+
+            selectedGraphics = new Graphics()
+                .rect(0, 0, 20, 20)
+                .stroke({
+                    color: 'ff0000',
+                    width: 2
+                });
+            $appStage?.addChild(selectedGraphics);
+            console.log(e);
+        }
+    }
     
 </script>
 <div class="flex flex-row">
@@ -79,10 +98,10 @@
 
         <Accordion autocollapse>
             {#each $loadedEntities as entity }
-                <AccordionItem>
+                <AccordionItem on:toggle={()=>selectEntity(entity)}>
                     <svelte:fragment slot="summary">{entity.name}</svelte:fragment>
                     <svelte:fragment slot="content">
-                        <Entity {entity} />
+                        <EntityUi {entity} />
                     </svelte:fragment>
                 </AccordionItem>
             {/each}
