@@ -54,21 +54,22 @@ function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): Sp
 
 function addDebugRects(entity: Entity) {
     const rectGraphics = new RectGraphics(entity);
+
     entity.addListener('showDebugRects', () => {
-        if (entity.components.get('Graphics')) {
+        if (entity.components.get('Graphics')) {        
             const graphics = entity.components.get('Graphics') as ImageGraphics;
-            // const bounds = graphics.sprite.bounds;
-            console.log(graphics.sprite);
-            rectGraphics.rects.push({
-                x: graphics.sprite.x,
-                y: graphics.sprite.y,
-                w: graphics.sprite.width,
-                h: graphics.sprite.height,
-            });
-            rectGraphics.createRectGraphics();
-            rectGraphics.addToScene(entity.container);
+            rectGraphics.addRect(graphics.getSpriteRect());
+
+            if (entity.container) rectGraphics.addToScene(entity.container);
         }
     });
+
+    entity.addListener('hideDebugRects', () => {
+        if (entity.components.get('Graphics')) {
+            if (entity.container) rectGraphics.removeFromScene(entity.container);
+            rectGraphics.clearRects();
+        }
+    })
 }
 
 

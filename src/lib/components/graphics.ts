@@ -5,34 +5,34 @@ import { Graphics, type Container, type Sprite, type Spritesheet, type Spriteshe
 
 
 export class RectGraphics extends EntityComponent {
-    rects: RectData[];
     rectGraphics: Graphics[];
 
     constructor(entity: Entity) {
         super(entity, "RectGraphics");
-        this.rects = [];
+        this.rectGraphics = [];
+    }
+    
+    addRect(rect: RectData) {
+        this.rectGraphics.push(new Graphics()
+            .rect(rect.x, rect.y, rect.w, rect.h)
+            .stroke({
+                color: 'ff0000',
+                width: 2
+            })
+        );
+    }
+
+    clearRects() {
         this.rectGraphics = [];
     }
 
-    createRectGraphics() {
-        for (const rectData of this.rects) {
-            this.rectGraphics.push(new Graphics()
-                .rect(rectData.x, rectData.y, rectData.w, rectData.h)
-                .stroke({
-                    color: 'ff0000',
-                    width: 2
-                })
-            );
-        }
+    addToScene(container: Container) {
+        container.addChild(...this.rectGraphics);
     }
 
-    addToScene(container: Container|undefined) {
-        if (container) container.addChild(...this.rectGraphics);
+    removeFromScene(container: Container) {
+        container.removeChild(...this.rectGraphics);
     }
-
-    // removeFromScene(container: Container) {
-    //     container.removeChild(this.sprite);
-    // }
 }
 
 
@@ -50,6 +50,19 @@ export class ImageGraphics extends EntityComponent {
 
     removeFromScene(container: Container) {
         container.removeChild(this.sprite);
+    }
+
+    getSpriteRect(): RectData {
+        const [w, h] = [this.sprite.width, this.sprite.height];
+        const [ax, ay] = [this.sprite.anchor.x, this.sprite.anchor.y];
+        const [px, py] = [this.sprite.position.x, this.sprite.position.y];
+
+        return {
+            x: px - (ax * w),
+            y: py - (ay * h),
+            w,
+            h
+        }
     }
 
     // UPDATE METHODS

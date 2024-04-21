@@ -56,9 +56,12 @@
 
     const selectEntity = (e: Entity) => {
         if (selectedEntity !== e) {
+            selectedEntity?.emit('hideDebugRects');
+
             selectedEntity = e;
             e.emit('showDebugRects');
         }
+        console.log($appStage?.children);
     }
     
 </script>
