@@ -3,7 +3,6 @@ import type { AppContext, EntityData, SpriteData } from "../types";
 import { Entity } from "../entities";
 import { ImageGraphics, AnimationGraphics } from "../components/graphics";
 import { EventEmitter } from "$lib/components/events";
-// import type { SpriteGraphics } from "./createEntities";
 
 export type SpriteGraphics = ImageGraphics | AnimationGraphics;
 
