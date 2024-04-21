@@ -2,7 +2,6 @@ import { Sprite, Spritesheet, type SpriteOptions } from "pixi.js";
 import type { AppContext, EntityData, SpriteData } from "../types";
 import { Entity } from "../entities";
 import { ImageGraphics, AnimationGraphics, RectGraphics } from "../components/graphics";
-import { EventEmitter } from "$lib/components/events";
 
 export type SpriteGraphics = ImageGraphics | AnimationGraphics;
 
@@ -53,10 +52,9 @@ function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): Sp
 }
 
 
-function addDebugRects(entity: Entity, events: EventEmitter) {
+function addDebugRects(entity: Entity) {
     const rectGraphics = new RectGraphics(entity);
-    events.addListener('showDebugRects', () => {
-        console.log('debug')
+    entity.addListener('showDebugRects', () => {
         if (entity.components.get('Graphics')) {
             const graphics = entity.components.get('Graphics') as ImageGraphics;
             // const bounds = graphics.sprite.bounds;
@@ -76,7 +74,6 @@ function addDebugRects(entity: Entity, events: EventEmitter) {
 
 export function createEntity(data: EntityData, ctx: AppContext) {
     const entity = new Entity(data?.name ?? '');
-    const events = new EventEmitter(entity);
 
     // assign parent container to entity
     if (data.container) {
@@ -91,10 +88,10 @@ export function createEntity(data: EntityData, ctx: AppContext) {
         const graphics: SpriteGraphics = getSpriteGraphics(entity, sprite, data.sprite);
 
         // add to scene when spawned
-        events.addListener('spawn', () => graphics.addToScene(entity.container));
+        entity.addListener('spawn', () => graphics.addToScene(entity.container));
 
         // add debug rects
-        addDebugRects(entity, events);
+        addDebugRects(entity);
     }
 
     // add update methods from entity data

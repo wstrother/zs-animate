@@ -14,28 +14,45 @@ export class EntityComponent {
     }
 }
 
-
+// event types
+type Listener = {
+    event: string,
+    method: Function
+}
 
 // base entity container, stores components and manages update methods
 export class Entity {
     name: string;
-    paused: boolean;
-    components: Map<string, EntityComponent>;
-    updateMethods: Array<Function>;
+    paused: boolean = false;
+    components: Map<string, EntityComponent> = new Map();
+    updateMethods: Array<Function> = [];
     container: Container | undefined;
+
+    listeners: Array<Listener> = [];
+    spawned: boolean = false;
 
     constructor(name: string) {
         this.name = name;
-
-        this.paused = false;
-
-        this.components = new Map();
-        this.updateMethods = [];        
     }
 
-    // UPDATE METHODS
+    emit(event: string) {
+        for (const listener of this.listeners) {
+            if (listener.event === event) {
+                listener.method();
+            }
+        }
+    }
+
+    addListener(event: string, method: Function) {
+        this.listeners.push({event, method});
+    }
 
     update() {
+        if (!this.spawned) {
+            this.spawned = true;
+            this.emit('spawn');
+        }
+        
         if (this.paused) return;
 
         this.updateMethods.forEach(method => {

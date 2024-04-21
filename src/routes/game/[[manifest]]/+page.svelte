@@ -4,8 +4,6 @@
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import type { Entity } from '$lib/entities.js';
 	import EntityUi from '$lib/ui/entityUI.svelte';
-	import { Graphics } from 'pixi.js';
-	import type { EventEmitter } from '$lib/components/events.js';
     
     export let data;
     let destroyApp: undefined | Function;
@@ -59,11 +57,7 @@
     const selectEntity = (e: Entity) => {
         if (selectedEntity !== e) {
             selectedEntity = e;
-            console.log('showing');
-            if (e.components.get('EventEmitter')) {
-                const events = e.components.get('EventEmitter') as EventEmitter;
-                events.emit('showDebugRects');
-            } 
+            e.emit('showDebugRects');
         }
     }
     
