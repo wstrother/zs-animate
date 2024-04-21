@@ -5,6 +5,7 @@
 	import type { Entity } from '$lib/entities.js';
 	import EntityUi from '$lib/ui/entityUI.svelte';
 	import { Graphics } from 'pixi.js';
+	import type { EventEmitter } from '$lib/components/events.js';
     
     export let data;
     let destroyApp: undefined | Function;
@@ -54,20 +55,15 @@
     }
 
     let selectedEntity: Entity | undefined;
-    let selectedGraphics: Graphics | undefined;
 
     const selectEntity = (e: Entity) => {
         if (selectedEntity !== e) {
             selectedEntity = e;
-
-            selectedGraphics = new Graphics()
-                .rect(0, 0, 20, 20)
-                .stroke({
-                    color: 'ff0000',
-                    width: 2
-                });
-            $appStage?.addChild(selectedGraphics);
-            console.log(e);
+            console.log('showing');
+            if (e.components.get('EventEmitter')) {
+                const events = e.components.get('EventEmitter') as EventEmitter;
+                events.emit('showDebugRects');
+            } 
         }
     }
     

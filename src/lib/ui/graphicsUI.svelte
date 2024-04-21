@@ -40,7 +40,10 @@
         {/if}
 
         {#if image}
-            hello
+            <div>
+                x: {image.sprite.x} <br />
+                y: {image.sprite.y} <br />
+            </div>
         {/if}
     </div>
 {/if}

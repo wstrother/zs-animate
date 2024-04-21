@@ -1,7 +1,7 @@
 import { Sprite, Spritesheet, type SpriteOptions } from "pixi.js";
 import type { AppContext, EntityData, SpriteData } from "../types";
 import { Entity } from "../entities";
-import { ImageGraphics, AnimationGraphics } from "../components/graphics";
+import { ImageGraphics, AnimationGraphics, RectGraphics } from "../components/graphics";
 import { EventEmitter } from "$lib/components/events";
 
 export type SpriteGraphics = ImageGraphics | AnimationGraphics;
@@ -37,7 +37,7 @@ export function createSprite(data: SpriteData, {textures, spritesheets}: AppCont
 }
 
 
-export function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): SpriteGraphics {
+function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteData): SpriteGraphics {
     if (data.graphics === 'image' || data.graphics === undefined) {
         return new ImageGraphics(entity, sprite);
 
@@ -51,6 +51,28 @@ export function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteDa
         throw Error(`Could not generate sprite graphics for ${entity.name}`);
     }
 }
+
+
+function addDebugRects(entity: Entity, events: EventEmitter) {
+    const rectGraphics = new RectGraphics(entity);
+    events.addListener('showDebugRects', () => {
+        console.log('debug')
+        if (entity.components.get('Graphics')) {
+            const graphics = entity.components.get('Graphics') as ImageGraphics;
+            // const bounds = graphics.sprite.bounds;
+            console.log(graphics.sprite);
+            rectGraphics.rects.push({
+                x: graphics.sprite.x,
+                y: graphics.sprite.y,
+                w: graphics.sprite.width,
+                h: graphics.sprite.height,
+            });
+            rectGraphics.createRectGraphics();
+            rectGraphics.addToScene(entity.container);
+        }
+    });
+}
+
 
 export function createEntity(data: EntityData, ctx: AppContext) {
     const entity = new Entity(data?.name ?? '');
@@ -70,6 +92,9 @@ export function createEntity(data: EntityData, ctx: AppContext) {
 
         // add to scene when spawned
         events.addListener('spawn', () => graphics.addToScene(entity.container));
+
+        // add debug rects
+        addDebugRects(entity, events);
     }
 
     // add update methods from entity data

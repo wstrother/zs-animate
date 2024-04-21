@@ -1,17 +1,38 @@
 import { Entity } from "$lib/entities";
 import type { RectData } from "$lib/types";
 import { EntityComponent } from "$lib/entities";
-import type { Container, Sprite, Spritesheet, SpritesheetFrameData, Texture } from "pixi.js";
+import { Graphics, type Container, type Sprite, type Spritesheet, type SpritesheetFrameData, type Texture } from "pixi.js";
 
 
 export class RectGraphics extends EntityComponent {
     rects: RectData[];
+    rectGraphics: Graphics[];
 
     constructor(entity: Entity) {
         super(entity, "RectGraphics");
         this.rects = [];
+        this.rectGraphics = [];
     }
 
+    createRectGraphics() {
+        for (const rectData of this.rects) {
+            this.rectGraphics.push(new Graphics()
+                .rect(rectData.x, rectData.y, rectData.w, rectData.h)
+                .stroke({
+                    color: 'ff0000',
+                    width: 2
+                })
+            );
+        }
+    }
+
+    addToScene(container: Container|undefined) {
+        if (container) container.addChild(...this.rectGraphics);
+    }
+
+    // removeFromScene(container: Container) {
+    //     container.removeChild(this.sprite);
+    // }
 }
 
 
