@@ -7,19 +7,31 @@ type Listener = {
 }
 
 export class EventEmitter extends EntityComponent {
-    listeners: Array<Listener>
+    listeners: Array<Listener>;
+    spawned: boolean = false;
 
     constructor(entity: Entity) {
         super(entity, "EventEmitter");
         this.listeners = [];
+
+        entity.updateMethods.push(() => {
+            if (!this.spawned) {
+                this.spawned = true;
+                this.emit('spawn');
+            }
+        })
     }
 
-    emit(name: string) {
+    emit(event: string) {
         for (const listener of this.listeners) {
-            if (listener.event === name) {
+            if (listener.event === event) {
                 listener.method();
             }
         }
+    }
+
+    addListener(event: string, method: Function) {
+        this.listeners.push({event, method});
     }
 
     // UPDATE METHODS

@@ -20,7 +20,6 @@ export class EntityComponent {
 export class Entity {
     name: string;
     paused: boolean;
-    spawned: boolean;
     components: Map<string, EntityComponent>;
     updateMethods: Array<Function>;
     container: Container | undefined;
@@ -29,21 +28,14 @@ export class Entity {
         this.name = name;
 
         this.paused = false;
-        this.spawned = false;
 
         this.components = new Map();
-        this.updateMethods = [];
-
-        
+        this.updateMethods = [];        
     }
 
     // UPDATE METHODS
 
     update() {
-        if (!this.spawned) {
-            this.spawned = true;
-        }
-
         if (this.paused) return;
 
         this.updateMethods.forEach(method => {

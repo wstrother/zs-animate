@@ -1,4 +1,4 @@
-import type { Application, ApplicationOptions, Spritesheet, Texture } from "pixi.js"
+import type { Application, ApplicationOptions, Container, Spritesheet, Texture } from "pixi.js"
 
 
 // GENERAL DATA TYPES
@@ -43,7 +43,8 @@ export type UpdateMethodData = {
 export type EntityData = {
     name?: string,
     sprite?: SpriteData,
-    updateMethods?: Array<UpdateMethodData>
+    updateMethods?: Array<UpdateMethodData>,
+    container?: string,
 }
 
 // MANIFEST DATA / APP CONTEXT
@@ -58,5 +59,6 @@ export type AppContext = {
     app: Application,
     textures: Record<string, Texture>,
     spritesheets: Record<string, Spritesheet>,
-    jsonFiles?: Record<string, {}>
+    jsonFiles?: Record<string, {}>,
+    containers: Record<string, Container>,
 }

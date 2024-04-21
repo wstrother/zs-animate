@@ -2,6 +2,7 @@ import { Sprite, Spritesheet, type SpriteOptions } from "pixi.js";
 import type { AppContext, EntityData, SpriteData } from "../types";
 import { Entity } from "../entities";
 import { ImageGraphics, AnimationGraphics } from "../components/graphics";
+import { EventEmitter } from "$lib/components/events";
 // import type { SpriteGraphics } from "./createEntities";
 
 export type SpriteGraphics = ImageGraphics | AnimationGraphics;
@@ -54,21 +55,30 @@ export function getSpriteGraphics(entity: Entity, sprite: Sprite, data: SpriteDa
 
 export function createEntity(data: EntityData, ctx: AppContext) {
     const entity = new Entity(data?.name ?? '');
+    const events = new EventEmitter(entity);
+
+    // assign parent container to entity
+    if (data.container) {
+        entity.container = ctx.containers[data.container];
+    } else {
+        entity.container = ctx.app.stage;
+    }
 
     if (data.sprite) {
         // generate graphics
         const sprite = createSprite(data.sprite, ctx);
         const graphics: SpriteGraphics = getSpriteGraphics(entity, sprite, data.sprite);
 
-        // add to scene
-        ctx.app.stage.addChild(graphics.sprite);
+        // add to scene when spawned
+        events.addListener('spawn', () => graphics.addToScene(entity.container));
     }
 
-    // add specified update methods
+    // add update methods from entity data
     for (const methodData of data.updateMethods ?? []) {
         entity.addUpdateMethod(methodData);
     }
 
+    // add root level entities to update ticker
     ctx.app.ticker.add(() => entity.update());
 
     return entity;

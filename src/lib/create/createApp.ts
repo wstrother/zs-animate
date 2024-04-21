@@ -81,7 +81,11 @@ export default {
         const spritesheets = await loadSheets(textures, manifest.spritesheets);
         // console.log(spritesheets);
 
-        const entities = addEntities(manifest.entities, {textures, spritesheets, app});
+        const entities = addEntities(manifest.entities, {
+            textures, 
+            spritesheets,
+            containers: {},
+            app});
         // console.log(sprites);
 
         return {

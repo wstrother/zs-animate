@@ -23,8 +23,8 @@ export class ImageGraphics extends EntityComponent {
         this.sprite = sprite;
     }
 
-    addToScene(container: Container) {
-        container.addChild(this.sprite);
+    addToScene(container: Container|undefined) {
+        if (container) container.addChild(this.sprite);
     }
 
     removeFromScene(container: Container) {
