@@ -1,6 +1,7 @@
 import type { AppContext, EntityData, UpdateMethodData } from "./types";
 import { createSprite } from "./sprites";
 import { type SpriteGraphics, getSpriteGraphics } from "./sprites";
+import type { EntityComponent } from "./components/components";
 
 
 // base entity container, stores components and manages update methods
@@ -8,7 +9,7 @@ export class Entity {
     name: string;
     paused: boolean;
     spawned: boolean;
-    components: Map<string, {}>;
+    components: Map<string, EntityComponent>;
     updateMethods: Array<Function>;
 
     constructor(name: string) {
@@ -75,5 +76,3 @@ export function createEntity(data: EntityData, ctx: AppContext) {
 
     return entity;
 }
-
-

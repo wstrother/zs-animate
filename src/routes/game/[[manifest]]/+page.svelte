@@ -33,7 +33,6 @@
                     loadedTextures.set(textures);
                     loadedSpritesheets.set(spritesheets);
                     loadedEntities.set(entities);
-                    console.log(entities);
                     appStage.set(app.stage);
                     destroyApp = destroy;
                     _startApp = start;
@@ -68,15 +67,15 @@
         </div>
     
         <div id="controls">
-            <button on:click={loadApp} class="btn btn-md variant-filled">Create app</button>
-            <button on:click={startApp} class="btn btn-md variant-filled">Start app</button>
-            <button on:click={stopApp} class="btn btn-md variant-filled">Stop app</button>
-            <button on:click={updateApp} class="btn btn-md variant-filled">Update app</button>
+            <button on:click={loadApp} class="btn btn-sm variant-filled">Create app</button>
+            <button on:click={startApp} class="btn btn-sm variant-filled">Start app</button>
+            <button on:click={stopApp} class="btn btn-sm variant-filled">Stop app</button>
+            <button on:click={updateApp} class="btn btn-sm variant-filled">Update app</button>
         </div>
     </div>
     
-    <div class="m-5">
-        <div class="h3">Entities</div>
+    <div class="m-5 variant-filled-primary rounded-md p-1 w-[400px]">
+        <div class="h3 mx-2">Entities</div>
 
         <Accordion autocollapse>
             {#each $loadedEntities as entity }
@@ -95,8 +94,8 @@
 <style>
     #appCanvas {
         margin: 1rem;
-        width: 800px;
-        height: 600px;
+        width: 500px;
+        height: 400px;
     }
 
     #controls {

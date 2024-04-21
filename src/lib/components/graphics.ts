@@ -1,24 +1,13 @@
 import { Entity } from "$lib/entities";
+import { EntityComponent } from "./components";
 import type { Sprite, Spritesheet, SpritesheetFrameData, Texture } from "pixi.js";
 
 
-export class Graphics {
-    entity: Entity;
-    name: string;
-
-    constructor(entity: Entity) {
-        this.entity = entity;
-        this.name = Graphics.name;
-        entity.components.set(this.name, this);
-    }
-}
-
-
-export class ImageGraphics extends Graphics {
+export class ImageGraphics extends EntityComponent {
     sprite: Sprite;
 
     constructor(entity: Entity, sprite: Sprite) {
-        super(entity);
+        super(entity, "Graphics");
         this.sprite = sprite;
     }
 
@@ -43,6 +32,10 @@ export class AnimationGraphics extends ImageGraphics {
         this.frameCounter = 0;
 
         entity.updateMethods.push(() => this.updateAnimation());
+    }
+
+    get states(): Array<string> {
+        return Object.keys(this.spritesheet.animations);
     }
 
     get animationIndex(): number {
@@ -70,6 +63,16 @@ export class AnimationGraphics extends ImageGraphics {
         return this.frameData?.frameLength ?? 1
     }
 
+    setState(state: string) {
+        this.state = state;
+        this.resetCounter();
+    }
+
+    resetCounter() {
+        this.frameCounter = 0;
+        this.animationCounter = 0;
+    }
+
     // UPDATE METHODS
     updateAnimation() {
         this.sprite.texture = this.animation[this.animationIndex];
@@ -80,5 +83,6 @@ export class AnimationGraphics extends ImageGraphics {
             this.animationCounter = (this.animationCounter + 1) % this.animation.length;
             this.frameCounter = 0;
         }
+
     }
 }
